@@ -39,7 +39,7 @@ pipeline {
         sh """
           KCTL='kubectl'
           command -v kubectl >/dev/null 2>&1 || KCTL='k3s kubectl'
-          \$KCTL apply -f k8s/deployment.yaml
+          \$KCTL apply -f k8s/
           \$KCTL set image deployment/github-profile-analyzer github-profile-analyzer=${IMAGE_NAME}:${IMAGE_TAG}
           \$KCTL rollout status deployment/github-profile-analyzer --timeout=120s
         """

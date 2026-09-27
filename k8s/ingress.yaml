@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: github-profile-analyzer
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /github-profile-analyzer
+            pathType: Prefix
+            backend:
+              service:
+                name: github-profile-analyzer
+                port:
+                  number: 80
