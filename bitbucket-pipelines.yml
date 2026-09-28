@@ -1,0 +1,26 @@
+image: atlassian/default-image:4
+
+options:
+  docker: true
+
+definitions:
+  caches:
+    docker: true
+
+pipelines:
+  default:
+    - step:
+        name: Checkout, Docker build, k3s deploy
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - export IMAGE_NAME=github-profile-analyzer
+          - export IMAGE_TAG="${BITBUCKET_BUILD_NUMBER}"
+          - docker build --build-arg VITE_APP_VERSION=${IMAGE_TAG} -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
+          - docker save ${IMAGE_NAME}:${IMAGE_TAG} | sudo k3s ctr images import - || docker save ${IMAGE_NAME}:${IMAGE_TAG} | k3s ctr images import -
+          - KCTL=kubectl
+          - command -v kubectl >/dev/null 2>&1 || KCTL="k3s kubectl"
+          - $KCTL apply -f k8s/
+          - $KCTL set image deployment/github-profile-analyzer github-profile-analyzer=${IMAGE_NAME}:${IMAGE_TAG}
+          - $KCTL rollout status deployment/github-profile-analyzer --timeout=120s
